@@ -114,7 +114,7 @@ public class ProblemStatement1 {
 
 		JavaRDD<YelloTaxiTrip> result = lines.mapPartitions(new ParseCsv()).filter(new Filter1());
 		
-		result.saveAsTextFile("PS1Output");
+		result.saveAsObjectFile("PS1Output"); 
 
 		//result.foreach(x -> System.out.println(yeptoString(x)));
 

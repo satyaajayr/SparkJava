@@ -88,6 +88,40 @@ public class ProblemStatement2 {
 		}
 	}
 
+	public static class YtToString implements FlatMapFunction<Iterator<YelloTaxiTrip>, String> {
+		public Iterator<String> call(Iterator<YelloTaxiTrip> ytps) throws Exception {
+			ArrayList<String> tripData = new ArrayList<String>();
+
+			while (ytps.hasNext()) {
+				YelloTaxiTrip ytp = ytps.next();
+				try {
+					StringBuilder s = new StringBuilder();
+					if (ytp.equals(null)) {
+						s = s.append("");
+					} else {
+						s = s.append(ytp.VendorID).append(",").append(ytp.tpep_pickup_datetime).append(",")
+								.append(ytp.tpep_dropoff_datetime).append(",").append(ytp.passenger_count).append(",")
+								.append(ytp.trip_distance).append(",").append(ytp.RatecodeID).append(",")
+								.append(ytp.store_and_fwd_flag).append(",").append(ytp.PULocationID).append(",")
+								.append(ytp.DOLocationID).append(",").append(ytp.payment_type).append(",").append(ytp.fare_amount)
+								.append(",").append(ytp.extra).append(",").append(ytp.mta_tax).append(",").append(ytp.tip_amount)
+								.append(",").append(ytp.tolls_amount).append(",").append(ytp.improvement_surcharge).append(",")
+								.append(ytp.total_amount);
+
+					}
+
+					tripData.add(s.toString());
+				} catch (Exception e) {
+					System.out.println(" Received Exception while parsing the csvFile. Exception is: " + e.toString());
+					e.printStackTrace();
+				}
+			}
+
+			return tripData.iterator();
+
+		}
+	}
+	
 	public static class Filter2 implements Function<YelloTaxiTrip, Boolean> {
 		public Boolean call(YelloTaxiTrip ytp) {
 
@@ -111,26 +145,28 @@ public class ProblemStatement2 {
 		JavaRDD<String> lines = sc.textFile("in/trip_yellow_taxi.data");
 
 		JavaRDD<YelloTaxiTrip> result = lines.mapPartitions(new ParseCsv()).filter(new Filter2());
-
-		result.saveAsTextFile("PS2Output");
+		
+		JavaRDD<String> stringResult = result.mapPartitions(new YtToString());
+		
+		stringResult.saveAsTextFile("PS2Output");
 
 		// result.foreach(x -> System.out.println(yeptoString(x)));
 
 	}
 
-	public static String yeptoString(YelloTaxiTrip yep) {
+	public static String yeptoString(YelloTaxiTrip ytp) {
 		StringBuilder s = new StringBuilder();
-		if (yep.equals(null)) {
+		if (ytp.equals(null)) {
 			s = s.append("");
 		} else {
-			s = s.append(yep.VendorID).append(",").append(yep.tpep_pickup_datetime).append(",")
-					.append(yep.tpep_dropoff_datetime).append(",").append(yep.passenger_count).append(",")
-					.append(yep.trip_distance).append(",").append(yep.RatecodeID).append(",")
-					.append(yep.store_and_fwd_flag).append(",").append(yep.PULocationID).append(",")
-					.append(yep.DOLocationID).append(",").append(yep.payment_type).append(",").append(yep.fare_amount)
-					.append(",").append(yep.extra).append(",").append(yep.mta_tax).append(",").append(yep.tip_amount)
-					.append(",").append(yep.tolls_amount).append(",").append(yep.improvement_surcharge).append(",")
-					.append(yep.total_amount);
+			s = s.append(ytp.VendorID).append(",").append(ytp.tpep_pickup_datetime).append(",")
+					.append(ytp.tpep_dropoff_datetime).append(",").append(ytp.passenger_count).append(",")
+					.append(ytp.trip_distance).append(",").append(ytp.RatecodeID).append(",")
+					.append(ytp.store_and_fwd_flag).append(",").append(ytp.PULocationID).append(",")
+					.append(ytp.DOLocationID).append(",").append(ytp.payment_type).append(",").append(ytp.fare_amount)
+					.append(",").append(ytp.extra).append(",").append(ytp.mta_tax).append(",").append(ytp.tip_amount)
+					.append(",").append(ytp.tolls_amount).append(",").append(ytp.improvement_surcharge).append(",")
+					.append(ytp.total_amount);
 
 		}
 		return s.toString();
