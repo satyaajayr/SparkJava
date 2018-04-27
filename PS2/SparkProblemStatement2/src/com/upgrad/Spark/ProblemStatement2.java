@@ -1,29 +1,19 @@
 package com.upgrad.Spark;
 
-import java.io.Serializable;
-import java.lang.Integer;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.FlatMapFunction;
 import org.apache.spark.api.java.function.Function;
-import org.spark_project.jetty.util.HttpCookieStore.Empty;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import scala.Tuple6;
 
 public class ProblemStatement2 {
 
-	public static class YelloTaxiTrip implements java.io.Serializable {
+	public static class YelloTaxiTrip {
 
 		public String VendorID;
 		public String tpep_pickup_datetime;
@@ -45,6 +35,7 @@ public class ProblemStatement2 {
 
 	}
 
+	@SuppressWarnings("serial")
 	public static class ParseCsv implements FlatMapFunction<Iterator<String>, YelloTaxiTrip> {
 		public Iterator<YelloTaxiTrip> call(Iterator<String> lines) throws Exception {
 			ArrayList<YelloTaxiTrip> tripData = new ArrayList<YelloTaxiTrip>();
@@ -88,6 +79,7 @@ public class ProblemStatement2 {
 		}
 	}
 
+	@SuppressWarnings("serial")
 	public static class YtToString implements FlatMapFunction<Iterator<YelloTaxiTrip>, String> {
 		public Iterator<String> call(Iterator<YelloTaxiTrip> ytps) throws Exception {
 			ArrayList<String> tripData = new ArrayList<String>();
@@ -103,14 +95,15 @@ public class ProblemStatement2 {
 								.append(ytp.tpep_dropoff_datetime).append(",").append(ytp.passenger_count).append(",")
 								.append(ytp.trip_distance).append(",").append(ytp.RatecodeID).append(",")
 								.append(ytp.store_and_fwd_flag).append(",").append(ytp.PULocationID).append(",")
-								.append(ytp.DOLocationID).append(",").append(ytp.payment_type).append(",").append(ytp.fare_amount)
-								.append(",").append(ytp.extra).append(",").append(ytp.mta_tax).append(",").append(ytp.tip_amount)
-								.append(",").append(ytp.tolls_amount).append(",").append(ytp.improvement_surcharge).append(",")
-								.append(ytp.total_amount);
+								.append(ytp.DOLocationID).append(",").append(ytp.payment_type).append(",")
+								.append(ytp.fare_amount).append(",").append(ytp.extra).append(",").append(ytp.mta_tax)
+								.append(",").append(ytp.tip_amount).append(",").append(ytp.tolls_amount).append(",")
+								.append(ytp.improvement_surcharge).append(",").append(ytp.total_amount);
 
 					}
 
 					tripData.add(s.toString());
+
 				} catch (Exception e) {
 					System.out.println(" Received Exception while parsing the csvFile. Exception is: " + e.toString());
 					e.printStackTrace();
@@ -121,7 +114,8 @@ public class ProblemStatement2 {
 
 		}
 	}
-	
+
+	@SuppressWarnings("serial")
 	public static class Filter2 implements Function<YelloTaxiTrip, Boolean> {
 		public Boolean call(YelloTaxiTrip ytp) {
 
@@ -130,6 +124,7 @@ public class ProblemStatement2 {
 		}
 	}
 
+	@SuppressWarnings("resource")
 	public static void main(String[] args) {
 		System.setProperty("hadoop.home.dir", "C:\\winutil");
 
@@ -144,13 +139,15 @@ public class ProblemStatement2 {
 		// read text file to RDD
 		JavaRDD<String> lines = sc.textFile("in/trip_yellow_taxi.data");
 
+		// Converting the String to a class type and filtering based on the filter data
 		JavaRDD<YelloTaxiTrip> result = lines.mapPartitions(new ParseCsv()).filter(new Filter2());
-		
-		JavaRDD<String> stringResult = result.mapPartitions(new YtToString());
-		
-		stringResult.saveAsTextFile("PS2Output");
 
-		// result.foreach(x -> System.out.println(yeptoString(x)));
+		// Converting back to String as its required while saving the file as text
+		// content.
+		JavaRDD<String> stringResult = result.mapPartitions(new YtToString());
+
+		// Saving the RDD as text file.
+		stringResult.saveAsTextFile("PS2Output");
 
 	}
 
