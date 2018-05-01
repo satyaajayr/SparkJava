@@ -1,5 +1,65 @@
 package com.upgrad.Spark;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
+import org.apache.spark.SparkConf;
+import org.apache.spark.api.java.JavaPairRDD;
+import org.apache.spark.api.java.JavaRDD;
+import org.apache.spark.api.java.JavaSparkContext;
+import org.apache.spark.api.java.function.PairFunction;
+
+import scala.Tuple2;
+
+public class ProblemStatement3 {
+
+	@SuppressWarnings({ "resource", "serial" })
+	public static void main(String[] args) {
+		//Setting up path for the Winutil
+		Path path = Paths.get("in", "Winutil");
+		System.setProperty("hadoop.home.dir", path.toAbsolutePath().toString());
+
+		// configure spark
+		SparkConf conf = new SparkConf().setAppName("ProblemStatement3").setMaster("local[*]");
+		// start a spark context
+		JavaSparkContext sc = new JavaSparkContext(conf);
+
+		// read text file to RDD
+		JavaRDD<String> lines = sc.textFile("in/trip_yellow_taxi.data");
+
+		// Filtering the lines based on the Problem conditions
+		JavaRDD<String> filteredLines = lines.filter(x -> !x.split(",")[0].equals("VendorID") && !x.isEmpty());
+		
+		JavaPairRDD<String,Integer> pairRDD = filteredLines.mapToPair(x -> new Tuple2<String, Integer>(x.split(",")[9],1));
+		
+		JavaPairRDD<String, Integer> countRDD = pairRDD.reduceByKey(Integer :: sum);
+		JavaPairRDD<Integer, String> swaped = countRDD.mapToPair(new PairFunction<Tuple2<String, Integer>, Integer, String>() {
+	           @Override
+	           public Tuple2<Integer, String> call(Tuple2<String, Integer> item) throws Exception {
+	               return item.swap();
+	           }
+
+	        });
+		
+		JavaPairRDD<Integer, String> ordered = swaped.sortByKey();
+		
+		JavaPairRDD<String, Integer> swaped2 = ordered.mapToPair(new PairFunction<Tuple2<Integer, String>, String, Integer>() {
+	           @Override
+	           public Tuple2<String, Integer> call(Tuple2<Integer, String> item) throws Exception {
+	               return item.swap();
+	           }
+
+	        });
+		
+		swaped2.saveAsTextFile("OutputPS3");
+		
+	}
+
+}
+
+
+/*package com.upgrad.Spark;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -174,7 +234,7 @@ public class ProblemStatement3 {
 
 
 
-
+*/
 
 
 
