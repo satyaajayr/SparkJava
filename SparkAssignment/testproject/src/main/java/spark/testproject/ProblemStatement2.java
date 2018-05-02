@@ -1,26 +1,22 @@
-package com.upgrad.Spark;
+package spark.testproject;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
+/*import java.nio.file.Path;
+import java.nio.file.Paths;*/
 
 import org.apache.spark.SparkConf;
-import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
-import org.apache.spark.api.java.function.PairFunction;
 
-import scala.Tuple2;
+public class ProblemStatement2 {
 
-public class ProblemStatement3 {
-
-	@SuppressWarnings({ "resource", "serial" })
+	@SuppressWarnings("resource")
 	public static void main(String[] args) {
 		//Setting up path for the Winutil
-		Path path = Paths.get("in", "Winutil");
-		System.setProperty("hadoop.home.dir", path.toAbsolutePath().toString());
+		//Path path = Paths.get("in", "Winutil");
+		//System.setProperty("hadoop.home.dir", path.toAbsolutePath().toString());
 
 		// configure spark
-		SparkConf conf = new SparkConf().setAppName("ProblemStatement3").setMaster("local[*]");
+		SparkConf conf = new SparkConf().setAppName("ProblemStatement2").setMaster("local[*]");
 		// start a spark context
 		JavaSparkContext sc = new JavaSparkContext(conf);
 
@@ -28,35 +24,18 @@ public class ProblemStatement3 {
 		JavaRDD<String> lines = sc.textFile(args[0]);
 
 		// Filtering the lines based on the Problem conditions
-		JavaRDD<String> filteredLines = lines.filter(x -> !x.split(",")[0].equals("VendorID") && !x.isEmpty());
-		
-		JavaPairRDD<String,Integer> pairRDD = filteredLines.mapToPair(x -> new Tuple2<String, Integer>(x.split(",")[9],1));
-		
-		JavaPairRDD<String, Integer> countRDD = pairRDD.reduceByKey(Integer :: sum);
-		JavaPairRDD<Integer, String> swaped = countRDD.mapToPair(new PairFunction<Tuple2<String, Integer>, Integer, String>() {
-	           @Override
-	           public Tuple2<Integer, String> call(Tuple2<String, Integer> item) throws Exception {
-	               return item.swap();
-	           }
+		JavaRDD<String> filteredLines = lines.filter(x -> !x.split(",")[0].equals("VendorID") && !x.isEmpty())
+				.filter(x -> {
+					String[] cols = x.split(",");
+					return cols[5].equals("4") ? true : false;
+				});
 
-	        });
-		
-		JavaPairRDD<Integer, String> ordered = swaped.sortByKey();
-		
-		JavaPairRDD<String, Integer> swaped2 = ordered.mapToPair(new PairFunction<Tuple2<Integer, String>, String, Integer>() {
-	           @Override
-	           public Tuple2<String, Integer> call(Tuple2<Integer, String> item) throws Exception {
-	               return item.swap();
-	           }
+		// Saving the output in a Text file.
+		filteredLines.saveAsTextFile(args[1]);
 
-	        });
-		
-		swaped2.saveAsTextFile(args[1]);
-		
 	}
 
 }
-
 
 /*package com.upgrad.Spark;
 
@@ -71,7 +50,7 @@ import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.FlatMapFunction;
 import org.apache.spark.api.java.function.Function;
 
-public class ProblemStatement3 {
+public class ProblemStatement2 {
 
 	public static class YelloTaxiTrip {
 
@@ -231,53 +210,117 @@ public class ProblemStatement3 {
 
 }
 
+//
+// result.take(5).forEach(x -> System.out.println(x.passenger_count));
+
+ * public int VendorID ; public String tpep_pickup_datetime ; public String
+ * tpep_dropoff_datetime ; public int passenger_count ; public float
+ * trip_distance; public int RatecodeID; public String store_and_fwd_flag;
+ * public String PULocationID; public String DOLocationID; public int
+ * payment_type; public float fare_amount; public float extra; public float
+ * mta_tax; public float tip_amount; public float tolls_amount; public float
+ * improvement_surcharge; public float total_amount;
+ 
+
+ * ytp.VendorID = (cols != null && cols[0] != "VendorID" && cols[0] != "") ?
+ * Integer.parseInt(cols[0]) : 0 ; ytp.tpep_pickup_datetime = cols[1];
+ * ytp.tpep_dropoff_datetime = cols[2]; ytp.passenger_count = (cols != null &&
+ * cols[0] != "passenger_count") ? Integer.parseInt(cols[3]) : 0;
+ * ytp.trip_distance = (cols != null && cols[0] != "trip_distance") ?
+ * Float.parseFloat(cols[4]) : 0; ytp.RatecodeID = (cols != null && cols[0] !=
+ * "RatecodeID") ? Integer.parseInt(cols[5]) : 0; ytp.store_and_fwd_flag =
+ * cols[6]; ytp.PULocationID = cols[7]; ytp.DOLocationID = cols[8];
+ * ytp.payment_type = (cols != null && cols[0] != "payment_type") ?
+ * Integer.parseInt(cols[9]) : 0; ytp.fare_amount = (cols != null && cols[0] !=
+ * "fare_amount") ? Float.parseFloat(cols[10]) : 0; ytp.mta_tax = (cols != null
+ * && cols[0] != "mta_tax") ? Float.parseFloat(cols[11]) : 0; ytp.tip_amount =
+ * (cols != null && cols[0] != "tip_amount") ? Float.parseFloat(cols[12]) : 0;
+ * ytp.tolls_amount = (cols != null && cols[0] != "tolls_amount") ?
+ * Float.parseFloat(cols[13]) : 0; ytp.improvement_surcharge = (cols != null &&
+ * cols[0] != "improvement_surcharge") ? Float.parseFloat(cols[14]) : 0;
+ * ytp.total_amount = (cols != null && cols[0] != "total_amount") ?
+ * Float.parseFloat(cols[15]) : 0;
+ 
+
+ * JavaRDD<Tuple6<Integer, String, String, Integer, Float, String >> data =
+ * lines.map(x -> x.split(",")). map(x -> new Tuple6<>(parseInt(x[0]), x[1],
+ * x[2], parseInt(x[3]), parseFloat(x[4]), x[5]));
+ 
+
+// lines.foreach(x -> System.out.println(x.split(",")[4] + " :: " +
+// x.split(",")[1]));
 
 
+ * JavaRDD<String> filteredLines = lines.filter(x ->
+ * x.contains("2017-10-01 00:15:30")); JavaRDD<String> filteredLines1 =
+ * lines.filter(new Function<String, Boolean>() { public Boolean call(String s)
+ * throws Exception { if(s == null || s.trim().length() < 1) { return false; }
+ * else if (s.split(",")[0] == "2") { return true; } else { return false; } }
+ * }); System.out.println(filteredLines1.count()); //filter(x -> x.split(",")[1]
+ * == "2017-10-01 00:15:30");/*. filter(x -> x.split(",")[2] ==
+ * "2017-10-01 00:25:11"). filter(x -> x.split(",")[3] == "1"). filter(x ->
+ * x.split(",")[4] == "2.17")
+ * 
+ * filteredLines.foreach(x -> System.out.println(x));
+ * System.out.println(filteredLines.count());
+ 
 
-*/
+// && && x.split(",")[3] == "1" && x.split(",")[4] == "2.17"
+// VendorID==2 AND
+
+ * tpep_pickup_datetime=='2017-10-01 00:15:30' AND
+ * tpep_dropoff_datetime=='2017-10-01 00:25:11' AND passenger_count==1 AND
+ * trip_distance==2.17");
+ 
+
+// SparkSession session =
+// SparkSession.builder().appName("ProblemStatement1").master("local[*]").getOrCreate();
+
+ * DataFrameReader dataframeReader = session.read();
+ * 
+ * Dataset<Row> ratings =
+ * dataframeReader.option("header","true").csv("in/trip_yellow_taxi.data");
+ * Dataset<Row> ratingsWithoutHeader =
+ * ratings.filter("VendorID == 1 or VendorID == 2"); Dataset<Row>
+ * filteredRatings = ratingsWithoutHeader.
+ * filter("VendorID==2 AND tpep_pickup_datetime=='2017-10-01 00:15:30' AND tpep_dropoff_datetime=='2017-10-01 00:25:11' AND passenger_count==1 AND trip_distance==2.17"
+ * );
+ * 
+ * filteredRatings.rdd().saveAsTextFile("ProblemStatememnt1");
+ 
 
 
-
-/*package com.upgrad.Spark;
-
-import java.util.Arrays;
-
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-//import org.apache.spark.SparkConf;
-//import org.apache.spark.api.java.JavaPairRDD;
-//import org.apache.spark.api.java.JavaRDD;
-//import org.apache.spark.api.java.JavaSparkContext;
-//import org.apache.spark.api.java.function.Function;
-import org.apache.spark.sql.DataFrameReader;
-import org.apache.spark.sql.Dataset;
-import org.apache.spark.sql.Encoder;
-import org.apache.spark.sql.Encoders;
-import org.apache.spark.sql.Row;
-import org.apache.spark.sql.SparkSession;
-
-//import scala.Tuple1;
-//import scala.Tuple10;
-//import scala.Tuple2;
-
-
-public class ProblemStatement3 {
-
-	public static void main(String[] args) {
-		System.setProperty("hadoop.home.dir", "C:\\winutil");
-
-		Logger.getLogger("org").setLevel(Level.ERROR);
-		SparkSession session = SparkSession.builder().appName("ProblemStatement3").master("local[*]").getOrCreate();		
-		DataFrameReader dataframeReader = session.read();
-		
-		Dataset<Row> ratings = dataframeReader.option("header","true").csv("in/trip_yellow_taxi.data");		
-		Dataset<Row> ratingsWithoutHeader = ratings.filter("VendorID == 1 or VendorID == 2");
-		Dataset<Row> groupedData = ratingsWithoutHeader.groupBy("payment_type").count();
-		Dataset<Row> sortedData = groupedData.orderBy(groupedData.col("count").asc());
-		
-		sortedData.rdd().saveAsTextFile("ProblemStatement3");
-		
-	}
-
-}
-*/
+ * package com.upgrad.Spark;
+ * 
+ * import java.util.Arrays;
+ * 
+ * import org.apache.log4j.Level; import org.apache.log4j.Logger; import
+ * org.apache.spark.SparkConf; import org.apache.spark.api.java.JavaPairRDD;
+ * import org.apache.spark.api.java.JavaRDD; import
+ * org.apache.spark.api.java.JavaSparkContext; import
+ * org.apache.spark.api.java.function.Function;
+ * 
+ * //import scala.Tuple1; //import scala.Tuple10; //import scala.Tuple2;
+ * 
+ * 
+ * public class ProblemStatement2 {
+ * 
+ * public static void main(String[] args) {
+ * System.setProperty("hadoop.home.dir", "C:\\winutil");
+ * 
+ * Logger.getLogger("org").setLevel(Level.ERROR); SparkSession session =
+ * SparkSession.builder().appName("ProblemStatement2").master("local[*]").
+ * getOrCreate(); DataFrameReader dataframeReader = session.read();
+ * 
+ * Dataset<Row> ratings =
+ * dataframeReader.option("header","true").csv("in/trip_yellow_taxi.data");
+ * Dataset<Row> ratingsWithoutHeader =
+ * ratings.filter("VendorID == 1 or VendorID == 2"); Dataset<Row>
+ * filteredRatings = ratingsWithoutHeader.filter("RatecodeID==4");
+ * 
+ * filteredRatings.rdd().saveAsTextFile("ProblemStatement2");
+ * 
+ * }
+ * 
+ * }
+ */

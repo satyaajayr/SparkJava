@@ -1,7 +1,7 @@
-package com.upgrad.Spark;
+package spark.testproject;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
+/*import java.nio.file.Path;
+import java.nio.file.Paths;*/
 
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaRDD;

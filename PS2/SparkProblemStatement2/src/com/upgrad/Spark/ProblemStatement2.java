@@ -21,7 +21,7 @@ public class ProblemStatement2 {
 		JavaSparkContext sc = new JavaSparkContext(conf);
 
 		// read text file to RDD
-		JavaRDD<String> lines = sc.textFile("in/trip_yellow_taxi.data");
+		JavaRDD<String> lines = sc.textFile(args[0]);
 
 		// Filtering the lines based on the Problem conditions
 		JavaRDD<String> filteredLines = lines.filter(x -> !x.split(",")[0].equals("VendorID") && !x.isEmpty())
@@ -31,7 +31,7 @@ public class ProblemStatement2 {
 				});
 
 		// Saving the output in a Text file.
-		filteredLines.saveAsTextFile("OutputPS2");
+		filteredLines.saveAsTextFile(args[1]);
 
 	}
 
