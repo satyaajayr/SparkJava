@@ -1,5 +1,44 @@
 package com.upgrad.Spark;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
+import org.apache.spark.SparkConf;
+import org.apache.spark.api.java.JavaRDD;
+import org.apache.spark.api.java.JavaSparkContext;
+
+public class ProblemStatement2 {
+
+	@SuppressWarnings("resource")
+	public static void main(String[] args) {
+		//Setting up path for the Winutil
+		Path path = Paths.get("in", "Winutil");
+		System.setProperty("hadoop.home.dir", path.toAbsolutePath().toString());
+
+		// configure spark
+		SparkConf conf = new SparkConf().setAppName("ProblemStatement2").setMaster("local[*]");
+		// start a spark context
+		JavaSparkContext sc = new JavaSparkContext(conf);
+
+		// read text file to RDD
+		JavaRDD<String> lines = sc.textFile(args[0]);
+
+		// Filtering the lines based on the Problem conditions
+		JavaRDD<String> filteredLines = lines.filter(x -> !x.split(",")[0].equals("VendorID") && !x.isEmpty())
+				.filter(x -> {
+					String[] cols = x.split(",");
+					return cols[5].equals("4") ? true : false;
+				});
+
+		// Saving the output in a Text file.
+		filteredLines.saveAsTextFile(args[1]);
+
+	}
+
+}
+
+/*package com.upgrad.Spark;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -173,7 +212,7 @@ public class ProblemStatement2 {
 
 //
 // result.take(5).forEach(x -> System.out.println(x.passenger_count));
-/*
+
  * public int VendorID ; public String tpep_pickup_datetime ; public String
  * tpep_dropoff_datetime ; public int passenger_count ; public float
  * trip_distance; public int RatecodeID; public String store_and_fwd_flag;
@@ -181,8 +220,8 @@ public class ProblemStatement2 {
  * payment_type; public float fare_amount; public float extra; public float
  * mta_tax; public float tip_amount; public float tolls_amount; public float
  * improvement_surcharge; public float total_amount;
- */
-/*
+ 
+
  * ytp.VendorID = (cols != null && cols[0] != "VendorID" && cols[0] != "") ?
  * Integer.parseInt(cols[0]) : 0 ; ytp.tpep_pickup_datetime = cols[1];
  * ytp.tpep_dropoff_datetime = cols[2]; ytp.passenger_count = (cols != null &&
@@ -201,17 +240,17 @@ public class ProblemStatement2 {
  * cols[0] != "improvement_surcharge") ? Float.parseFloat(cols[14]) : 0;
  * ytp.total_amount = (cols != null && cols[0] != "total_amount") ?
  * Float.parseFloat(cols[15]) : 0;
- */
-/*
+ 
+
  * JavaRDD<Tuple6<Integer, String, String, Integer, Float, String >> data =
  * lines.map(x -> x.split(",")). map(x -> new Tuple6<>(parseInt(x[0]), x[1],
  * x[2], parseInt(x[3]), parseFloat(x[4]), x[5]));
- */
+ 
 
 // lines.foreach(x -> System.out.println(x.split(",")[4] + " :: " +
 // x.split(",")[1]));
 
-/*
+
  * JavaRDD<String> filteredLines = lines.filter(x ->
  * x.contains("2017-10-01 00:15:30")); JavaRDD<String> filteredLines1 =
  * lines.filter(new Function<String, Boolean>() { public Boolean call(String s)
@@ -224,19 +263,19 @@ public class ProblemStatement2 {
  * 
  * filteredLines.foreach(x -> System.out.println(x));
  * System.out.println(filteredLines.count());
- */
+ 
 
 // && && x.split(",")[3] == "1" && x.split(",")[4] == "2.17"
 // VendorID==2 AND
-/*
+
  * tpep_pickup_datetime=='2017-10-01 00:15:30' AND
  * tpep_dropoff_datetime=='2017-10-01 00:25:11' AND passenger_count==1 AND
  * trip_distance==2.17");
- */
+ 
 
 // SparkSession session =
 // SparkSession.builder().appName("ProblemStatement1").master("local[*]").getOrCreate();
-/*
+
  * DataFrameReader dataframeReader = session.read();
  * 
  * Dataset<Row> ratings =
@@ -248,9 +287,9 @@ public class ProblemStatement2 {
  * );
  * 
  * filteredRatings.rdd().saveAsTextFile("ProblemStatememnt1");
- */
+ 
 
-/*
+
  * package com.upgrad.Spark;
  * 
  * import java.util.Arrays;

@@ -1,7 +1,7 @@
-package com.upgrad.Spark;
+package spark.testproject;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
+/*import java.nio.file.Path;
+import java.nio.file.Paths;*/
 
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaPairRDD;
@@ -16,8 +16,8 @@ public class ProblemStatement3 {
 	@SuppressWarnings({ "resource", "serial" })
 	public static void main(String[] args) {
 		//Setting up path for the Winutil
-		Path path = Paths.get("in", "Winutil");
-		System.setProperty("hadoop.home.dir", path.toAbsolutePath().toString());
+		//Path path = Paths.get("in", "Winutil");
+		//System.setProperty("hadoop.home.dir", path.toAbsolutePath().toString());
 
 		// configure spark
 		SparkConf conf = new SparkConf().setAppName("ProblemStatement3").setMaster("local[*]");
